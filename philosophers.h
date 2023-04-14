@@ -12,7 +12,7 @@
 
 typedef struct s_philo
 {
-	int current_time;
+	int	current_time;
 	int num;
 	int time_to_die;
 	int time_to_eat;
@@ -23,7 +23,6 @@ typedef struct s_philo
 	int died;
 	char *forks_flag;
 	pthread_mutex_t *forks;
-
 
 }				t_philo;
 typedef struct s_philo_id
