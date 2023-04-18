@@ -1,25 +1,39 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jalwahei <jalwahei@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/04/12 14:05:44 by jalwahei          #+#    #+#             */
+/*   Updated: 2023/04/16 06:14:30 by jalwahei         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philosophers.h"
 
-static int overflowcheck(long long val, int sign, char c)
+static int	overflowcheck(long long val, int sign, char c)
 {
 	if (sign == 1)
 	{
-		if (val > __LONG_MAX__ / 10 || (val == __LONG_MAX__ / 10 && c - '0' > __LONG_MAX__ % 10))
+		if (val > __LONG_MAX__ / 10 || (val == __LONG_MAX__ / 10 \
+		&& c - '0' > __LONG_MAX__ % 10))
 			return (-1);
 	}
 	else
 	{
-		if (-val < -(__LONG_MAX__ - 1) / 10 || (-val == -(__LONG_MAX__ - 1) / 10 && c - '0' > __LONG_MAX__ % 10 + 1))
+		if (-val < -(__LONG_MAX__ - 1) / 10 || (-val == -(__LONG_MAX__ - 1) \
+		/ 10 && c - '0' > __LONG_MAX__ % 10 + 1))
 			return (0);
 	}
 	return (1);
 }
 
-int ft_atoi(char const *str, int *status)
+int	ft_atoi(char const *str, int *status)
 {
-	long long val;
-	int sign;
-	int i;
+	long long	val;
+	int			sign;
+	int			i;
 
 	val = 0;
 	sign = 1;
@@ -44,7 +58,7 @@ int ft_atoi(char const *str, int *status)
 	return ((int)val * sign);
 }
 
-int ft_isstrdigit(char *str)
+int	ft_isstrdigit(char *str)
 {
 	if (*str && (*str == '+' || *str == '-'))
 		str++;
@@ -57,10 +71,10 @@ int ft_isstrdigit(char *str)
 	return (1);
 }
 
-int num_large(char *str)
+int	num_large(char *str)
 {
-	int status;
-	int val;
+	int	status;
+	int	val;
 
 	if (ft_isstrdigit(str))
 	{
@@ -77,9 +91,9 @@ int num_large(char *str)
 	return (1);
 }
 
-size_t ft_strlen(const char *str)
+size_t	ft_strlen(const char *str)
 {
-	size_t count;
+	size_t	count;
 
 	count = 0;
 	while (*str != '\0')
