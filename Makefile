@@ -1,9 +1,10 @@
-CFLAGS	=	-Wall -Wextra -Werror -g3
+CFLAGS	=	-g3 # -fsanitize=thread
 
 NAME	=	philo
 
 SRC		=	utils3.c\
 			utils.c	\
+			utils4.c	\
 			utils2.c	\
 			philosophers.c
 
