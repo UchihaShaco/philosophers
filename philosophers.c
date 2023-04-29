@@ -6,34 +6,32 @@
 /*   By: jalwahei <jalwahei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/12 13:05:44 by jalwahei          #+#    #+#             */
-/*   Updated: 2023/04/25 19:03:11 by jalwahei         ###   ########.fr       */
+/*   Updated: 2023/04/29 20:36:18 by jalwahei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-int	fork_handle(t_philo_id philo)
+int	fork_handle(t_philo_id *philo)
 {
-	if (th_get(&philo.philo->forks_flag[ft_pos2(philo)], 1) == 0) {
+	if (philo->has_one_fork == 0)
+	{
+		if (th_get(&philo->philo->forks_flag[ft_pos(*philo)], 0) == 0)
+		{
+			pthread_mutex_unlock(&philo->philo->forks_flag \
+		[ft_pos(*philo)].lock);
+			return (0);
+		}
+		th_set(&philo->philo->forks_flag[ft_pos(*philo)], 0, 1);
+		philo->has_one_fork = 1;
+	}
+	if (th_get(&philo->philo->forks_flag[ft_pos2(*philo)], 0) == 0)
+	{
+		pthread_mutex_unlock(&philo->philo->forks_flag[ft_pos2(*philo)].lock);
 		return (0);
 	}
-	if (th_get(&philo.philo->forks_flag[ft_pos(philo)], 0) == 0)
-	{
-		pthread_mutex_unlock(&philo.philo->forks_flag[ft_pos(philo)].lock);
-		return (0);
-	}
-
-	th_set(&philo.philo->forks_flag[ft_pos(philo)] , 0, 1);
-	printing(philo, 1);
-
-	if (th_get(&philo.philo->forks_flag[ft_pos2(philo)], 0) == 0 )
-	{
-		pthread_mutex_unlock(&philo.philo->forks_flag[ft_pos2(philo)].lock);
-		th_set(&philo.philo->forks_flag[ft_pos(philo)] , 1, 0);
-		return (1);
-	}
-	th_set(&philo.philo->forks_flag[ft_pos2(philo)] , 0, 1);
-	printing(philo, 1);
+	th_set(&philo->philo->forks_flag[ft_pos2(*philo)], 0, 1);
+	philo->has_one_fork = 0;
 	return (2);
 }
 
@@ -45,24 +43,11 @@ void	state_zero(t_philo_id *philo, int *state, int *prevstate, int *food)
 		ft_delay(philo->philo->time_to_die);
 	else
 		ft_delay(philo->philo->time_to_eat);
-	th_set(&philo->philo->forks_flag[ft_pos(*philo)], 1 , 0);
-	th_set(&philo->philo->forks_flag[ft_pos2(*philo)], 1 , 0);
+	th_set(&philo->philo->forks_flag[ft_pos(*philo)], 1, 0);
+	th_set(&philo->philo->forks_flag[ft_pos2(*philo)], 1, 0);
 	(*food)++;
 	*prevstate = *state;
 	*state = 2;
-	// pthread_mutex_unlock(&philo->philo->state_lock);
-}
-
-void	state_two(t_philo_id *philo, int *state, int *prevstate)
-{
-	printing(*philo, 3);
-	if (philo->philo->time_to_die < philo->philo->time_to_sleep \
-	+ philo->philo->time_to_eat)
-		ft_delay(philo->philo->time_to_die - philo->philo->time_to_eat);
-	else
-		ft_delay(philo->philo->time_to_sleep);
-	*prevstate = *state;
-	*state = 1;
 }
 
 void	*p_life(void *data)
@@ -76,34 +61,21 @@ void	*p_life(void *data)
 	state = 0;
 	philo = (t_philo_id *)data;
 	philo->time_stamp = gettime();
-		// {printf("philo id is %d\n",philo->id +1);}
-
 	while (food != philo->philo->eat_must && th_get(&philo->philo->died, 1) == 0
 		&& !death_check(*philo))
 	{
-	// printf("philo done\n");
 		if (state == 0)
 		{
-			state = fork_handle(*philo);
+			state = fork_handle(philo);
 			if (state != 2)
-			{
-				// printf("state is %d\n", state);
 				continue ;
-			}
 			state_zero(philo, &state, &prevstate, &food);
 		}
-		else if (state == 1)
-		{
-			printing(*philo, 4);
-			state = 0;
-		}
-		else if (state == 2)
-			state_two(philo, &state, &prevstate);
+		else
+			state_one_two(philo, &state, &prevstate, state);
 	}
- 	th_set(&philo->philo->still_eating, th_get(&philo->philo->still_eating, 0) -1, 1);
-	// int val = th_get(&philo->philo->still_eating, 0);
-	// th_set(&philo->philo->still_eating,  val - 1, 1);
-	// printf("philo %d is done eating", philo->id + 1);
+	th_set(&philo->philo->still_eating, \
+	th_get(&philo->philo->still_eating, 0) - 1, 1);
 	return (NULL);
 }
 
@@ -121,6 +93,7 @@ void	philos_start(t_philo *p_data)
 		philos_id[i].id = i;
 		philos_id[i].philo = p_data;
 		philos_id[i].time_stamp = -1;
+		philos_id[i].has_one_fork = 0;
 		i++;
 	}
 	i = 0;
@@ -131,7 +104,6 @@ void	philos_start(t_philo *p_data)
 	}
 	philo_detach_die(p_data, threads, i);
 	free(threads);
-	// *threads = '\0';
 	free_cycle(philos_id);
 }
 

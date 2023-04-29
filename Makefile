@@ -1,4 +1,4 @@
-CFLAGS	=	-g3 # -fsanitize=thread
+CFLAGS	=	-g3# -fsanitize=thread
 
 NAME	=	philo
 

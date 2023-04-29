@@ -6,7 +6,7 @@
 /*   By: jalwahei <jalwahei@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/16 06:10:07 by jalwahei          #+#    #+#             */
-/*   Updated: 2023/04/25 19:01:28 by jalwahei         ###   ########.fr       */
+/*   Updated: 2023/04/29 20:21:33 by jalwahei         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,9 @@ int	death_check(t_philo_id philos_id)
 	int				curr_time;
 
 	curr_time = gettime();
-	//  if (curr_time - philos_id.time_stamp >= philos_id.philo->time_to_die)
-	// printf("philo id is %d time is %d\n",philos_id.id +1 , curr_time - philos_id.time_stamp);
 	if (curr_time - philos_id.time_stamp >= philos_id.philo->time_to_die)
 	{
-		// printf("died is %d\n",philos_id.philo->died.val);
-		// philos_id.philo->died.val = philos_id.id + 1;
-		th_set(&philos_id.philo->died, philos_id.id + 1,0);
-		// exit(0);
-		// printf("died is %d\n",philos_id.philo->died.val);
+		th_set(&philos_id.philo->died, philos_id.id + 1, 0);
 		return (1);
 	}
 	return (0);
@@ -33,37 +27,22 @@ int	death_check(t_philo_id philos_id)
 
 void	philo_detach_die(t_philo *p_data, pthread_t *threads, int i)
 {
-	// int	b;
-	// b = i;
-
-	while (th_get(&p_data->still_eating,1) > 0)
+	while (th_get(&p_data->still_eating, 1) > 0)
 	{
-		// pthread_mutex_unlock(&p_data->fork_lock);
-		// pthread_mutex_lock(&p_data->died_lock);
 		if (th_get(&p_data->died, 1) > 0)
 		{
-			// pthread_mutex_unlock(&p_data->died_lock);
-			// while (b > 0)
-			// while (i > 0)
-			// {
-			// 	pthread_detach(threads[i - 1]);
-			// 	i--;
-			// }
 			pthread_mutex_lock(&p_data->print_lock);
-			printf("%d %d died\n", gettime() - p_data->mt, th_get(&p_data->died, 1));
+			printf("%d %d died\n", gettime() - p_data->mt, \
+			th_get(&p_data->died, 1));
 			pthread_mutex_unlock(&p_data->print_lock);
 			break ;
 		}
-		// else
-		// {pthread_mutex_unlock(&p_data->died_lock);}
-	// pthread_mutex_unlock(&p_data->time_lock);
 	}
-	printf("here\n");
-			while (i > 0)
-			{
-				pthread_join(threads[i -1], NULL);
-				i--;
-			}
+	while (i > 0)
+	{
+		pthread_join(threads[i - 1], NULL);
+		i--;
+	}
 }
 
 void	ft_delay(int ms)
@@ -79,7 +58,6 @@ void	ft_delay(int ms)
 	while (ms >= current_time - start_time)
 	{
 		gettimeofday(&tms, NULL);
-		// usleep(50);
 		current_time = tms.tv_usec / 1000 + tms.tv_sec * 1000 ;
 	}
 }
@@ -104,8 +82,8 @@ void	printing(t_philo_id philo, int msg)
 
 int	init_philo(t_philo *philo, char **argv)
 {
-	int status;
-	int i;
+	int	status;
+	int	i;
 
 	i = 0;
 	philo->num = ft_atoi(argv[1], &status);
@@ -118,7 +96,6 @@ int	init_philo(t_philo *philo, char **argv)
 	philo->forks_flag = malloc(sizeof(t_locks) * philo->num);
 	pthread_mutex_init(&philo->died.lock, NULL);
 	pthread_mutex_init(&philo->still_eating.lock, NULL);
-
 	philo->still_eating.val = philo->num;
 	philo->died.val = 0;
 	while (i < philo->num)
@@ -127,7 +104,5 @@ int	init_philo(t_philo *philo, char **argv)
 		philo->forks_flag[i++].val = 1;
 	}
 	pthread_mutex_init(&philo->print_lock, NULL);
-
-	memset(philo->forks_flag, 1, philo->num);
 	return (0);
 }
